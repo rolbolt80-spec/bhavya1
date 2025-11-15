@@ -1,365 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Utility Function to Handle Confetti Effect ---
-    const confettiCanvas = document.getElementById('confetti-canvas');
-    const confettiCtx = confettiCanvas.getContext('2d');
-    let W, H;
-    let maxConfetti = 50;
-    let confettis = [];
-    let animationTimer = null;
-
-    function resizeCanvas() {
-        W = confettiCanvas.width = window.innerWidth;
-        H = confettiCanvas.height = window.innerHeight;
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    function Confetti(x, y, color) {
-        this.x = x;
-        this.y = y;
-        this.r = 1 + Math.random() * 2;
-        this.d = Math.random() * maxConfetti;
-        this.color = color;
-        this.tilt = Math.floor(Math.random() * 10) - 10;
-        this.tiltAngle = 0;
-        this.tiltAngleIncremental = (Math.random() * 0.07) + 0.05;
-        this.speed = (Math.random() * 3) + 1;
-    }
-
-    Confetti.prototype.draw = function() {
-        confettiCtx.beginPath();
-        confettiCtx.strokeStyle = this.color;
-        confettiCtx.lineWidth = 2;
-        confettiCtx.moveTo(this.x + this.tilt + this.r, this.y);
-        confettiCtx.lineTo(this.x + this.tilt, this.y + this.r);
-        confettiCtx.stroke();
-    };
-
-    function drawConfetti() {
-        confettiCtx.clearRect(0, 0, W, H);
-        let results = [];
-        let i = 0;
-
-        for (i = 0; i < confettis.length; i++) {
-            results.push(updateConfetti(confettis[i], i));
-        }
-        return results;
-    }
-
-    function updateConfetti(confetti, index) {
-        confetti.tiltAngle += confetti.tiltAngleIncremental;
-        confetti.y += (Math.cos(confetti.d) + 3 + confetti.speed);
-        confetti.tilt = (Math.sin(confetti.tiltAngle) * 20);
-
-        if (confetti.y > H) {
-            confettis.splice(index, 1); // Remove and re-add for a constant stream
-            confettis.push(new Confetti(Math.random() * W, -10, `hsl(${Math.random() * 360}, 100%, 70%)`));
-        }
-        confetti.draw();
-    }
-
-    function startConfetti() {
-        for (let i = 0; i < maxConfetti; i++) {
-            confettis.push(new Confetti(Math.random() * W, Math.random() * H, `hsl(${Math.random() * 360}, 100%, 70%)`));
-        }
-        animationTimer = setInterval(drawConfetti, 30);
-    }
-
-    function stopConfetti() {
-        clearInterval(animationTimer);
-        confettis = [];
-        confettiCtx.clearRect(0, 0, W, H);
-        animationTimer = null;
-    }
-
-    // --- Global Game State ---
-    const gameStatus = {
-        game1: false,
-        game2: false,
-        game3: false
-    };
-
-    const revealButton = document.getElementById('revealButton');
-    const hiddenMessage = document.getElementById('hiddenMessage');
-    const photoGallery = document.getElementById('photoGallery');
-    const progress1 = document.getElementById('progress1');
-    const progress2 = document.getElementById('progress2');
-    const progress3 = document.getElementById('progress3');
-
-    function updateProgress() {
-        const checkIcon = '<i class="fas fa-check-circle text-green"></i>';
-        const crossIcon = '<i class="fas fa-times-circle text-red"></i>';
-
-        progress1.innerHTML = `Guess: ${gameStatus.game1 ? checkIcon : crossIcon}`;
-        progress2.innerHTML = `Memory: ${gameStatus.game2 ? checkIcon : crossIcon}`;
-        progress3.innerHTML = `Balloon: ${gameStatus.game3 ? checkIcon : crossIcon}`;
-
-        if (gameStatus.game1 && gameStatus.game2 && gameStatus.game3) {
-            revealButton.disabled = false;
-            revealButton.innerHTML = '<i class="fas fa-unlock"></i> UNLOCKED! View Your Gift! <i class="fas fa-unlock"></i>';
-            // Start a subtle confetti burst to highlight the button
-            if (animationTimer === null) {
-                startConfetti();
-                setTimeout(stopConfetti, 5000); // Stop after 5 seconds
-            }
-        }
-    }
-
-    // --- Reveal Gift Handler ---
-    revealButton.addEventListener('click', () => {
-        if (!revealButton.disabled) {
-            hiddenMessage.classList.remove('hidden');
-            photoGallery.classList.remove('hidden');
-            revealButton.classList.add('hidden'); // Hide the button after use
-            
-            // Start full confetti stream (or restart if it stopped)
-            if (animationTimer === null) {
-                startConfetti();
-            }
-            
-            // Scroll to the message
-            hiddenMessage.scrollIntoView({ behavior: 'smooth' });
-        }
-    });
-
-
-    // =========================================================================
-    // 1. Galactic Guess Game Logic (Number Guessing)
-    // =========================================================================
-    const guessInput = document.getElementById('guessInput');
-    const guessButton = document.getElementById('guessButton');
-    const game1Result = document.getElementById('game1Result');
-    const game2Area = document.getElementById('game2-area');
-    
-    const correctNumber = Math.floor(Math.random() * 10) + 1;
-    let attempts = 0;
-
-    guessButton.addEventListener('click', () => {
-        if (gameStatus.game1) return; // Prevent re-playing
-
-        const userGuess = parseInt(guessInput.value);
-
-        if (isNaN(userGuess) || userGuess < 1 || userGuess > 10) {
-            game1Result.textContent = 'Please enter a valid number between 1 and 10.';
-            return;
-        }
-
-        attempts++;
-
-        if (userGuess === correctNumber) {
-            gameStatus.game1 = true;
-            game1Result.innerHTML = `🎉 **CORRECT!** The number was ${correctNumber}. You won in ${attempts} attempt(s)!`;
-            guessInput.disabled = true;
-            guessButton.disabled = true;
-            game2Area.classList.remove('hidden-game');
-            game2Area.scrollIntoView({ behavior: 'smooth' });
-            updateProgress();
-        } else if (userGuess < correctNumber) {
-            game1Result.textContent = 'Too low! Try a higher number.';
-        } else {
-            game1Result.textContent = 'Too high! Try a lower number.';
-        }
-    });
-
-
-    // =========================================================================
-    // 2. Memory Match Game Logic
-    // =========================================================================
-    const memoryGrid = document.getElementById('memoryGrid');
-    const game2Result = document.getElementById('game2Result');
-    const game3Area = document.getElementById('game3-area');
-
-    const cardIcons = ['<i class="fas fa-moon"></i>', '<i class="fas fa-sun"></i>', '<i class="fas fa-star"></i>', '<i class="fas fa-globe"></i>'];
-    const gameCards = [...cardIcons, ...cardIcons];
-    gameCards.sort(() => Math.random() - 0.5); // Shuffle cards
-
-    let flippedCards = [];
-    let matchedPairs = 0;
-    let lockBoard = false;
-
-    function createBoard() {
-        memoryGrid.innerHTML = '';
-        gameCards.forEach((icon, index) => {
-            const card = document.createElement('div');
-            card.classList.add('card');
-            card.dataset.icon = icon;
-            card.innerHTML = `
-                <div class="card-inner">
-                    <div class="card-back"><i class="fas fa-question"></i></div>
-                    <div class="card-face">${icon}</div>
-                </div>
-            `;
-            card.addEventListener('click', () => flipCard(card));
-            memoryGrid.appendChild(card);
-        });
-    }
-
-    function flipCard(card) {
-        if (gameStatus.game2 || lockBoard || card.classList.contains('matched') || card === flippedCards[0]) return;
-
-        card.classList.add('flipped');
-        flippedCards.push(card);
-
-        if (flippedCards.length === 2) {
-            lockBoard = true;
-            checkForMatch();
-        }
-    }
-
-    function checkForMatch() {
-        const [card1, card2] = flippedCards;
-        const isMatch = card1.dataset.icon === card2.dataset.icon;
-
-        isMatch ? disableCards() : unflipCards();
-    }
-
-    function disableCards() {
-        flippedCards[0].classList.add('matched');
-        flippedCards[1].classList.add('matched');
-        matchedPairs++;
-
-        resetBoard();
-
-        if (matchedPairs === cardIcons.length) {
-            gameStatus.game2 = true;
-            game2Result.innerHTML = '✨ **MEMORY MASTER!** You matched all the pairs!';
-            game3Area.classList.remove('hidden-game');
-            game3Area.scrollIntoView({ behavior: 'smooth' });
-            updateProgress();
-        }
-    }
-
-    function unflipCards() {
-        setTimeout(() => {
-            flippedCards[0].classList.remove('flipped');
-            flippedCards[1].classList.remove('flipped');
-            resetBoard();
-        }, 1000);
-    }
-
-    function resetBoard() {
-        [flippedCards, lockBoard] = [[], false];
-    }
-
-    createBoard(); // Initialize the memory game board
-
-
-    // =========================================================================
-    // 3. Balloon Pop Game Logic
-    // =========================================================================
-    const targetBalloon = document.getElementById('targetBalloon');
-    const startBalloonGameButton = document.getElementById('startBalloonGame');
-    const game3Result = document.getElementById('game3Result');
-    const balloonTimerDisplay = document.getElementById('balloonTimer');
-
-    const maxClicks = 3;
-    const gameTime = 5; // seconds
-    let clicks = 0;
-    let timer;
-    let timeLeft;
-    let gameActive = false;
-
-    function updateTimerDisplay() {
-        balloonTimerDisplay.textContent = `Time Left: ${timeLeft.toFixed(1)}s | Clicks Left: ${maxClicks - clicks}`;
-    }
-
-    function startTimer() {
-        gameActive = true;
-        targetBalloon.style.cursor = 'pointer';
-        startBalloonGameButton.disabled = true;
-        game3Result.textContent = 'Go! Go! Go!';
-
-        const startTime = Date.now();
-
-        timer = setInterval(() => {
-            timeLeft = gameTime - (Date.now() - startTime) / 1000;
-            updateTimerDisplay();
-
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                endGame(false);
-            }
-        }, 100);
-    }
-
-    function endGame(win) {
-        gameActive = false;
-        clearInterval(timer);
-        targetBalloon.style.cursor = 'default';
-        startBalloonGameButton.disabled = false;
-        balloonTimerDisplay.textContent = '';
-
-        if (win) {
-            gameStatus.game3 = true;
-            game3Result.innerHTML = '🌟 **SUCCESS!** You popped the balloon just in time!';
-            startBalloonGameButton.textContent = 'Game Complete!';
-            startBalloonGameButton.disabled = true;
-            updateProgress();
-        } else {
-            game3Result.textContent = clicks === maxClicks ? 'Time ran out! Try again!' : 'Time\'s up! Click faster next time!';
-            startBalloonGameButton.textContent = 'Try Again';
-            resetGame();
-        }
-    }
-
-    function resetGame() {
-        clicks = 0;
-        timeLeft = gameTime;
-        targetBalloon.classList.remove('popped');
-        targetBalloon.style.opacity = 1;
-    }
-
-    targetBalloon.addEventListener('click', () => {
-        if (!gameActive || gameStatus.game3) return;
-
-        clicks++;
-        game3Result.textContent = `Click! Clicks: ${clicks}`;
-        updateTimerDisplay();
-
-        // Simple visual pop effect
-        targetBalloon.style.opacity = (maxClicks - clicks) / maxClicks;
-
-        if (clicks >= maxClicks) {
-            targetBalloon.classList.add('popped');
-            endGame(true);
-        }
-    });
-
-    startBalloonGameButton.addEventListener('click', () => {
-        if (gameStatus.game3) return;
-        resetGame();
-        startTimer();
-    });
-    
-    resetGame(); // Initial setup
-
-    // =========================================================================
-    // 4. Wish Wall Logic
-    // =========================================================================
-    const wishes = [
-        "happy birthday pretty little bouni 💀  🎂",
-        "May your day be as sparkling as a supernova! 🎂",
-        "Wishing you a year filled with cosmic joy and success!",
-        "May your light shine brighter than the North Star! ✨",
-        "Hope your birthday is out of this world! 🚀",
-        "Happy Birthday to the most stellar friend! ❤️",
-        "May all your birthday wishes come true, like a shooting star!",
-        "You are a true galaxy of talent! Keep shining!",
-        "May your cake be sweet and your journey amazing!",
-    ];
-
-    const wishWall = document.getElementById('wishWall');
-    const showNextWishButton = document.getElementById('showNextWishButton');
-    let currentWishIndex = 0;
-
-    function showNextWish() {
-        // Simple fade out
-        wishWall.style.opacity = 0;
-
-        setTimeout(() => {
-            wishWall.innerHTML = `<p>${wishes[currentWishIndex]}</p>`;
-            document.addEventListener('DOMContentLoaded', () => {
     // --- Global Confetti/Sparkle Setup ---
     const confettiCanvas = document.getElementById('confetti-canvas');
     const confettiCtx = confettiCanvas.getContext('2d');
@@ -376,36 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    function Confetti(x, y, color, type = 'confetti') {
-        this.x = x;
-        this.y = y;
-        this.r = 1 + Math.random() * 3; // Slightly larger confetti
-        this.d = Math.random() * maxConfetti;
-        this.color = color;
-        this.tilt = Math.floor(Math.random() * 10) - 10;
-        this.tiltAngle = 0;
-        this.tiltAngleIncremental = (Math.random() * 0.07) + 0.05;
-        this.speed = (Math.random() * 3) + 1;
-        this.type = type; // 'confetti', 'star', 'flower'
-    }
-
-    Confetti.prototype.draw = function() {
-        confettiCtx.beginPath();
-        if (this.type === 'star') {
-            drawStar(confettiCtx, this.x, this.y, 5, this.r * 2, this.r);
-            confettiCtx.fillStyle = this.color;
-            confettiCtx.fill();
-        } else if (this.type === 'flower') {
-            drawFlower(confettiCtx, this.x, this.y, this.r * 1.5, this.color);
-        } else { // default confetti
-            confettiCtx.strokeStyle = this.color;
-            confettiCtx.lineWidth = 2;
-            confettiCtx.moveTo(this.x + this.tilt + this.r, this.y);
-            confettiCtx.lineTo(this.x + this.tilt, this.y + this.r);
-            confettiCtx.stroke();
-        }
-    };
-
+    // Helper functions for drawing custom confetti shapes
     function drawStar(ctx, x, y, points, outerRadius, innerRadius) {
         let rot = Math.PI / 2 * 3;
         let step = Math.PI / points;
@@ -446,16 +56,42 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
 
+    function Confetti(x, y, color, type = 'confetti') {
+        this.x = x;
+        this.y = y;
+        this.r = 1 + Math.random() * 3; 
+        this.d = Math.random() * maxConfetti;
+        this.color = color;
+        this.tilt = Math.floor(Math.random() * 10) - 10;
+        this.tiltAngle = 0;
+        this.tiltAngleIncremental = (Math.random() * 0.07) + 0.05;
+        this.speed = (Math.random() * 3) + 1;
+        this.type = type; 
+    }
+
+    Confetti.prototype.draw = function() {
+        confettiCtx.beginPath();
+        if (this.type === 'star') {
+            drawStar(confettiCtx, this.x, this.y, 5, this.r * 2, this.r);
+            confettiCtx.fillStyle = this.color;
+            confettiCtx.fill();
+        } else if (this.type === 'flower') {
+            drawFlower(confettiCtx, this.x, this.y, this.r * 1.5, this.color);
+        } else { // default confetti
+            confettiCtx.strokeStyle = this.color;
+            confettiCtx.lineWidth = 2;
+            confettiCtx.moveTo(this.x + this.tilt + this.r, this.y);
+            confettiCtx.lineTo(this.x + this.tilt, this.y + this.r);
+            confettiCtx.stroke();
+        }
+    };
 
     function drawConfetti() {
         confettiCtx.clearRect(0, 0, W, H);
-        let results = [];
         let i = 0;
-
         for (i = 0; i < confettis.length; i++) {
-            results.push(updateConfetti(confettis[i], i));
+            updateConfetti(confettis[i], i);
         }
-        return results;
     }
 
     function updateConfetti(confetti, index) {
@@ -473,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startConfettiBurst(duration = 5000) {
         if (animationTimer) clearInterval(animationTimer);
-        confettis = []; // Clear existing for a fresh burst
+        confettis = []; 
         for (let i = 0; i < maxConfetti; i++) {
             const type = ['confetti', 'star', 'flower'][Math.floor(Math.random() * 3)];
             confettis.push(new Confetti(Math.random() * W, Math.random() * H, `hsl(${Math.random() * 360}, 100%, 70%)`, type));
@@ -537,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             revealButton.classList.remove('disabled-button');
             revealButton.classList.add('glowing-button'); // Add glowing effect
             revealButton.innerHTML = '<i class="fas fa-unlock animated-icon"></i> UNLOCKED! View Your Magical Gift! <i class="fas fa-unlock animated-icon"></i>';
-            startConfettiBurst(7000); // Longer confetti burst on unlock
+            startConfettiBurst(7000); 
         }
     }
 
@@ -546,11 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!revealButton.disabled) {
             hiddenMessage.classList.remove('hidden');
             photoGallery.classList.remove('hidden');
-            revealButton.classList.add('hidden'); // Hide the button after use
+            revealButton.classList.add('hidden'); 
             
-            startConfettiBurst(10000); // Even longer, celebratory burst
+            startConfettiBurst(10000); 
             
-            // Scroll to the message
             hiddenMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
@@ -604,9 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const game2Result = document.getElementById('game2Result');
     const game3Area = document.getElementById('game3-area');
 
-    const cardIcons = ['🌸', '🌼', '🌺', '🌷', '🦋', '🐞']; // More cute icons!
+    const cardIcons = ['🌸', '🌼', '🌺', '🌷', '🦋', '🐞']; 
     const gameCards = [...cardIcons, ...cardIcons];
-    gameCards.sort(() => Math.random() - 0.5); // Shuffle cards
+    gameCards.sort(() => Math.random() - 0.5); 
 
     let flippedCards = [];
     let matchedPairs = 0;
@@ -652,11 +287,9 @@ document.addEventListener('DOMContentLoaded', () => {
             card2.classList.add('matched');
             matchedPairs++;
             
-            // Add a little pop effect for matched cards
             card1.style.animation = 'cardMatchPop 0.3s ease-out';
             card2.style.animation = 'cardMatchPop 0.3s ease-out';
             
-            // Reset animation after it plays
             setTimeout(() => {
                 card1.style.animation = '';
                 card2.style.animation = '';
@@ -688,19 +321,19 @@ document.addEventListener('DOMContentLoaded', () => {
         [flippedCards, lockBoard] = [[], false];
     }
 
-    createBoard(); // Initialize the memory game board
+    createBoard(); 
 
 
     // =========================================================================
     // 3. Butterfly Pop Game Logic
     // =========================================================================
-    const targetBalloon = document.getElementById('targetBalloon'); // Renamed for butterfly visually
+    const targetBalloon = document.getElementById('targetBalloon'); 
     const startBalloonGameButton = document.getElementById('startBalloonGame');
     const game3Result = document.getElementById('game3Result');
     const balloonTimerDisplay = document.getElementById('balloonTimer');
 
     const maxClicks = 3;
-    const gameTime = 7; // seconds (a little more forgiving)
+    const gameTime = 7; 
     let clicks = 0;
     let timer;
     let timeLeft;
@@ -716,10 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
         startBalloonGameButton.disabled = true;
         game3Result.textContent = 'Flutter & Catch!';
 
-        // Reset butterfly position and scale
+        // Random starting position
         targetBalloon.style.transform = `translate(${Math.random() * 80 - 40}%, ${Math.random() * 80 - 40}%) scale(1)`;
         targetBalloon.style.opacity = 1;
-        targetBalloon.classList.remove('caught'); // Ensure not caught initially
+        targetBalloon.classList.remove('caught'); 
+        targetBalloon.classList.add('glowing-butterfly');
 
         const startTime = Date.now();
 
@@ -740,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
         targetBalloon.style.cursor = 'default';
         startBalloonGameButton.disabled = false;
         balloonTimerDisplay.textContent = '';
-        targetBalloon.classList.remove('glowing-butterfly'); // Stop glowing
+        targetBalloon.classList.remove('glowing-butterfly'); 
 
         if (win) {
             gameStatus.game3 = true;
@@ -760,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
         timeLeft = gameTime;
         targetBalloon.classList.remove('caught');
         targetBalloon.style.opacity = 1;
-        targetBalloon.classList.add('glowing-butterfly'); // Make it glow when game is reset/ready
+        targetBalloon.classList.add('glowing-butterfly'); 
     }
 
     targetBalloon.addEventListener('click', (e) => {
@@ -771,10 +405,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTimerDisplay();
         createClickSparkle(e.clientX, e.clientY);
 
-        // Visual feedback for catch
+        // Visual feedback for catch and new random position
         targetBalloon.style.transform += ' scale(0.8)';
         setTimeout(() => {
-             targetBalloon.style.transform = `translate(${Math.random() * 80 - 40}%, ${Math.random() * 80 - 40}%) scale(1)`; // New random position
+             targetBalloon.style.transform = `translate(${Math.random() * 80 - 40}%, ${Math.random() * 80 - 40}%) scale(1)`; 
         }, 200);
 
 
@@ -790,13 +424,14 @@ document.addEventListener('DOMContentLoaded', () => {
         startTimer();
     });
     
-    resetGame(); // Initial setup
+    resetGame(); 
 
     // =========================================================================
     // 4. Wish Wall Logic
     // =========================================================================
     const wishes = [
-        "gappiest birthday pretty little bouni 🌸🥰! 🎂",
+        "happiest birthday pretty little bouni🥰💝 🎂",
+        "May your day be as sparkling as a supernova! 🎂",
         "Wishing you a year filled with cosmic joy and success!",
         "May your light shine brighter than the North Star! ✨",
         "Hope your birthday is out of this world! 🚀",
@@ -811,37 +446,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentWishIndex = 0;
 
     function showNextWish() {
-        // Simple fade out
         wishWall.style.opacity = 0;
 
         setTimeout(() => {
             wishWall.innerHTML = `<p>${wishes[currentWishIndex]}</p>`;
-            // Simple fade in
             wishWall.style.opacity = 1;
 
             currentWishIndex = (currentWishIndex + 1) % wishes.length;
-        }, 500); // Wait for fade out
+        }, 500); 
     }
     
     showNextWishButton.addEventListener('click', showNextWish);
     
-    // Initial display of the first wish after a brief delay
     setTimeout(showNextWish, 1000);
 
-    // Initialize progress tracker
-    updateProgress();
-});// Simple fade in
-            wishWall.style.opacity = 1;
-
-            currentWishIndex = (currentWishIndex + 1) % wishes.length;
-        }, 500); // Wait for fade out
-    }
-    
-    showNextWishButton.addEventListener('click', showNextWish);
-    
-    // Initial display of the first wish after a brief delay
-    setTimeout(showNextWish, 1000);
-
-    // Initialize progress tracker
     updateProgress();
 });
