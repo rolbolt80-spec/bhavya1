@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Bhavya! ✨🌸</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-animation-container">
+        </div>
+    <canvas id="confetti-canvas"></canvas>
+    <div id="sparkle-overlay"></div> 
+    
+    <div class="container">
+        
+        <div class="profile-photo-container">
+            <img src="bhavya_profile.jpg" alt="Bhavya's Profile Photo" class="profile-photo">
+            <div class="profile-glow"></div>
+        </div>
+        
+        <h1 class="cute-font">Happy Birthday, Bhavya!</h1>
+        <p class="subtitle">Welcome to your **Enchanted Garden of Surprises!**</p>
+        <p class="subtitle">Play the games to reveal your magical gift! 🌸✨</p>
+        
+        <div class="music-player-section interactive-card">
+            <h3><i class="fas fa-music animated-icon"></i> Melodies of Joy</h3>
+            <p class="audio-note">Tap play for a sprinkle of birthday cheer!</p>
+            <audio controls loop>
+                <source src="birthday_song.mp3" type="audio/mp3">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+
+        <div class="wish-wall-section interactive-card">
+            <h2><i class="fas fa-meteor animated-icon"></i> Wishing Bloom</h2>
+            <div id="wishWall" class="wish-wall">
+                <p class="initial-wish">Petals of wishes are floating your way!</p>
+            </div>
+            <button id="showNextWishButton" class="cute-button"><i class="fas fa-leaf"></i> Reveal Another Wish <i class="fas fa-leaf"></i></button>
+        </div>
+        
+        <div class="game-section interactive-card">
+            <h2><i class="fas fa-gamepad animated-icon"></i> Playful Challenges</h2>
+            
+            <div class="game-area" id="game1-area">
+                <h3>1. Fairy Number Guess (1-10)</h3>
+                <input type="number" id="guessInput" class="cute-input" min="1" max="10" placeholder="Guess (1-10)">
+                <button id="guessButton" class="cute-button"><i class="fas fa-magic"></i> Guess! <i class="fas fa-magic"></i></button>
+                <p id="game1Result" class="game-result"></p>
+            </div>
+            
+            <div class="game-area hidden-game" id="game2-area">
+                <h3>2. Blossom Memory Match</h3>
+                <div id="memoryGrid" class="memory-grid">
+                </div>
+                <p id="game2Result" class="game-result"></p>
+            </div>
+
+            <div class="game-area hidden-game" id="game3-area">
+                <h3>3. Butterfly Pop</h3>
+                <p>Catch the glowing butterfly 3 times!</p>
+                <div id="balloonArea" class="balloon-area">
+                    <div class="butterfly" id="targetBalloon"></div>
+                    <div class="flower-decoration flower1"></div>
+                    <div class="flower-decoration flower2"></div>
+                </div>
+                <p id="game3Result" class="game-result"></p>
+                <p id="balloonTimer"></p>
+                <button id="startBalloonGame" class="cute-button"><i class="fas fa-play"></i> Start Butterfly Hunt <i class="fas fa-play"></i></button>
+            </div>
+
+            <div id="gameProgressTracker">
+                <p>Your Journey:
+                    <span id="progress1">Guess: <i class="fas fa-times-circle text-red"></i></span> |
+                    <span id="progress2">Memory: <i class="fas fa-times-circle text-red"></i></span> |
+                    <span id="progress3">Butterfly: <i class="fas fa-times-circle text-red"></i></span>
+                </p>
+            </div>
+
+        </div>
+        <button id="revealButton" class="cute-button disabled-button" disabled>
+            <i class="fas fa-lock animated-icon"></i> Magical Gift Locked (Win all games) <i class="fas fa-lock animated-icon"></i>
+        </button>
+
+        <div id="hiddenMessage" class="message-card hidden">
+            <h2><i class="fas fa-gem text-primary"></i> You're a Star, Bhavya! <i class="fas fa-gem text-primary"></i></h2>
+            <p>Dearest Bhavya,</p>
+            <p>**Congratulations on completing all the playful challenges!** This message is just for you. Wishing you a birthday as beautiful and bright as you are, filled with joy, laughter, and all your heart's desires. May your year ahead blossom with happiness and success!</p>
+            <p class="signature">- Nazim</p> 
+            <div class="message-sparkles"></div>
+        </div>
+    </div>
+    
+    <div id="photoGallery" class="photo-gallery-section hidden interactive-card">
+        <h2><i class="fas fa-images animated-icon"></i> Bhavya's Beautiful Moments</h2>
+        <p class="gallery-subtitle">A bouquet of memories, just for you!</p>
+        <div class="gallery-grid">
+            
+            <div class="gallery-item">
+                <img src="bhavya_photo1.jpg" alt="Bhavya's Photo 1">
+            </div>
+
+            <div class="gallery-item">
+                <img src="bhavya_photo2.jpg" alt="Bhavya's Photo 2">
+            </div>
+
+            <div class="gallery-item">
+                <img src="bhavya_photo3.jpg" alt="Bhavya's Photo 3">
+            </div>
+
+            <div class="gallery-item">
+                <img src="bhavya_photo4.jpg" alt="Bhavya's Photo 4">
+            </div>
+          
+        </div>
+        <p style="margin-top: 20px; font-style: italic;">gallery ke liye photos hi nhi the 🥲!</p>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
