@@ -1,4 +1,4 @@
-/* --- Global Styles --- */
+/* --- Global Styles --- *//* --- Global Styles --- */
 :root {
     --primary-color: #ff99cc; /* Soft Pink */
     --secondary-color: #a0e0ff; /* Soft Blue */
@@ -28,7 +28,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 10px;
+    padding: 20px 10px; 
     position: relative;
     overflow-x: hidden;
 }
@@ -70,7 +70,6 @@ body {
     50% { transform: translate(50px, 50vh) rotate(180deg); opacity: 0.5; }
     100% { transform: translate(100px, 110vh) rotate(360deg); opacity: 0.3; }
 }
-
 
 /* --- Confetti Canvas (Full Screen) --- */
 #confetti-canvas {
@@ -365,7 +364,7 @@ h3 {
     width: 100%;
     height: 100%;
     transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Springy transition */
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }
 
 .card.flipped .card-inner {
@@ -436,7 +435,6 @@ h3 {
     cursor: default;
     box-shadow: 0 0 15px rgba(255, 204, 0, 0.7);
     z-index: 20;
-    /* Butterfly wings (simple decorative element using pseudo-classes) */
     transform-origin: 50% 50%;
 }
 
@@ -475,6 +473,7 @@ h3 {
 }
 .flower1 { top: 10px; left: 10%; content: '🌷'; color: #e74c3c; }
 .flower2 { bottom: 20px; right: 15%; content: '🌼'; color: #ffeb3b; }
+
 
 /* --- Hidden Gift Message --- */
 .message-card {
@@ -517,8 +516,8 @@ h3 {
 
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+    gap: 15px;
     margin-top: 25px;
 }
 
@@ -544,31 +543,41 @@ h3 {
     display: block;
 }
 
-/* --- Media Queries --- */
-@media (max-width: 650px) {
+
+/* --- Mobile-Specific CSS Adjustments --- */
+@media (max-width: 500px) {
+    body {
+        padding-top: 10px;
+    }
     .cute-font {
-        font-size: 3em;
+        font-size: 2.5em; 
     }
-    .profile-photo-container {
-        width: 120px;
-        height: 120px;
-    }
-    .memory-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        max-width: 95%;
-    }
-    .card {
+    h2 {
         font-size: 1.5em;
     }
-    .gallery-grid {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    .container {
+        padding: 15px;
+    }
+    .profile-photo-container {
+        width: 100px;
+        height: 100px;
+    }
+    .memory-grid {
+        gap: 5px; 
+    }
+    .card {
+        font-size: 1.2em; 
     }
     .cute-button {
-        padding: 10px 20px;
+        padding: 8px 15px;
         font-size: 0.9em;
     }
     .cute-input {
-        max-width: 100px;
+        max-width: 80px;
+        font-size: 1em;
     }
+    audio {
+        max-width: 90%;
+    }
+}
 }
